@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
+import LandingPage from './components/LandingPage'
+import '../node_modules/patternfly-react/dist/css/patternfly-react.css'
+import SampleTable from './components/landingpage/SampleTable'
 
 class App extends Component {
   render() {
     return (
       <div className="App">
-          <p>
-            Mobile Security Service
-          </p>
+        <SampleTable />
       </div>
     );
   }
