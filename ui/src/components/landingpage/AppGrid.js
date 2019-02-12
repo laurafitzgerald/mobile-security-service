@@ -1,63 +1,257 @@
 import React, { Component } from 'react';
 import AppGridHeader from './AppGridHeader';
 import AppGridRows from './AppGridRows';
-import { Table } from 'patternfly-react';
+import { orderBy } from 'lodash';
+import * as sort from 'sortabular';
+import * as resolve from 'table-resolver';
+import {
+  actionHeaderCellFormatter,
+  customHeaderFormattersDefinition,
+  defaultSortingOrder,
+  sortableHeaderCellFormatter,
+  tableCellFormatter,
+  Table,
+  TABLE_SORT_DIRECTION
+} from 'patternfly-react';
+import { MenuItem } from 'patternfly-react';
+import { compose } from 'recompose';
+
+const mockRows = [
+  { name: 'mike', height: '178', eye_color: 'blue', gender: 'male', birth_year: '1979', actions: null },
+  { name: 'john', height: '175', eye_color: 'green', gender: 'male', birth_year: '1974', actions: null },
+  { name: 'mary', height: '180', eye_color: 'red', gender: 'female', birth_year: '1989', actions: null },
+  { name: 'fred', height: '175', eye_color: 'brown', gender: 'male', birth_year: '1990', actions: null },
+  { name: 'ann', height: '160', eye_color: 'black', gender: 'female', birth_year: '1999', actions: null }
+];
 
 class AppGrid extends Component {
-  constructor() {
-    super();
-    this.state = {};
-  }
+  constructor(props) {
+    super(props);
 
-  render() {
-    return (
-      <div className="appGrid">
-        <div>
-          <Table.PfProvider
-            striped
-            bordered
-            hover
-            columns={[
-              {
-                header: { label: 'First Name', formatters: [  ] },
-                cell: { formatters: [  ] },
-                property: 'first_name'
-              },
-              {
-                header: { label: 'Last Name', formatters: [  ] },
-                cell: { formatters: [  ] },
-                property: 'last_name'
-              },
-              {
-                header: { label: 'Username', formatters: [  ] },
-                cell: { formatters: [  ] },
-                property: 'username'
+    // Point the transform to your sortingColumns. React state can work for this purpose
+    // but you can use a state manager as well.
+    const getSortingColumns = () => this.state.sortingColumns || {};
+
+    const sortableTransform = sort.sort({
+      getSortingColumns,
+      onSort: (selectedColumn) => {
+        this.setState({
+          sortingColumns: sort.byColumn({
+            sortingColumns: this.state.sortingColumns,
+            sortingOrder: defaultSortingOrder,
+            selectedColumn
+          })
+        });
+      },
+      // Use property or index dependening on the sortingColumns structure specified
+      strategy: sort.strategies.byProperty
+    });
+
+    const sortingFormatter = sort.header({
+      sortableTransform,
+      getSortingColumns,
+      strategy: sort.strategies.byProperty
+    });
+
+    // enables our custom header formatters extensions to reactabular
+    this.customHeaderFormatters = customHeaderFormattersDefinition;
+
+    this.state = {
+      // Sort the first column in an ascending way by default.
+      sortingColumns: {
+        name: {
+          direction: TABLE_SORT_DIRECTION.ASC,
+          position: 0
+        }
+      },
+      columns: [
+        {
+          property: 'name',
+          header: {
+            label: 'Name',
+            props: {
+              index: 0,
+              rowSpan: 1,
+              colSpan: 1,
+              sort: true
+            },
+            transforms: [ sortableTransform ],
+            formatters: [ sortingFormatter ],
+            customFormatters: [ sortableHeaderCellFormatter ]
+          },
+          cell: {
+            props: {
+              index: 0
+            },
+            formatters: [ tableCellFormatter ]
+          }
+        },
+        {
+          property: 'height',
+          header: {
+            label: 'Height',
+            props: {
+              index: 1,
+              rowSpan: 1,
+              colSpan: 1,
+              sort: true
+            },
+            transforms: [ sortableTransform ],
+            formatters: [ sortingFormatter ],
+            customFormatters: [ sortableHeaderCellFormatter ]
+          },
+          cell: {
+            props: {
+              index: 1
+            },
+            formatters: [ tableCellFormatter ]
+          }
+        },
+        {
+          property: 'eye_color',
+          header: {
+            label: 'Eye Color',
+            props: {
+              index: 2,
+              rowSpan: 1,
+              colSpan: 1,
+              sort: true
+            },
+            transforms: [ sortableTransform ],
+            formatters: [ sortingFormatter ],
+            customFormatters: [ sortableHeaderCellFormatter ]
+          },
+          cell: {
+            props: {
+              index: 2
+            },
+            formatters: [ tableCellFormatter ]
+          }
+        },
+        {
+          property: 'gender',
+          header: {
+            label: 'Gender',
+            props: {
+              index: 3,
+              rowSpan: 1,
+              colSpan: 1,
+              sort: true
+            },
+            transforms: [ sortableTransform ],
+            formatters: [ sortingFormatter ],
+            customFormatters: [ sortableHeaderCellFormatter ]
+          },
+          cell: {
+            props: {
+              index: 3
+            },
+            formatters: [ tableCellFormatter ]
+          }
+        },
+        {
+          property: 'birth_year',
+          header: {
+            label: 'Birth Year',
+            props: {
+              index: 4,
+              rowSpan: 1,
+              colSpan: 1,
+              sort: true
+            },
+            transforms: [ sortableTransform ],
+            formatters: [ sortingFormatter ],
+            customFormatters: [ sortableHeaderCellFormatter ]
+          },
+          cell: {
+            props: {
+              index: 4
+            },
+            formatters: [ tableCellFormatter ]
+          }
+        },
+        {
+          property: 'actions',
+          header: {
+            label: 'Actions',
+            props: {
+              index: 5,
+              rowSpan: 1,
+              colSpan: 2
+            },
+            formatters: [ actionHeaderCellFormatter ]
+          },
+          cell: {
+            props: {
+              index: 5
+            },
+            formatters: [
+              (value, { rowData }) => {
+                return [
+                  <Table.Actions key="0">
+                    <Table.Button onClick={() => alert('clicked ' + rowData.name)}>Actions</Table.Button>
+                  </Table.Actions>,
+                  <Table.Actions key="1">
+                    <Table.DropdownKebab id="myKebab" pullRight>
+                      <MenuItem>Action</MenuItem>
+                      <MenuItem>Another Action</MenuItem>
+                      <MenuItem>Something else here</MenuItem>
+                      <MenuItem divider />
+                      <MenuItem>Separated link</MenuItem>
+                    </Table.DropdownKebab>
+                  </Table.Actions>
+                ];
               }
-            ]}
-          >
-            <Table.Header />
-            <Table.Body
-              rows={[
-                {
-                  id: 0,
-                  first_name: 'Dan',
-                  last_name: 'Abramov'
-                },
-                {
-                  id: 1,
-                  first_name: 'Sebastian',
-                  last_name: 'Markbåge'
-                },
-                {
-                  id: 2,
-                  first_name: 'Sophie',
-                  last_name: 'Alpert'
-                }
-              ]}
-              rowKey="id"
-            />
-          </Table.PfProvider>
-        </div>
+            ]
+          }
+        }
+      ],
+      rows: mockRows.slice(0, 6)
+    };
+  }
+  render() {
+    const { rows, sortingColumns, columns } = this.state;
+
+    const sortedRows = compose(
+      sort.sorter({
+        columns: columns,
+        sortingColumns,
+        sort: orderBy,
+        strategy: sort.strategies.byProperty
+      })
+    )(rows);
+
+    return (
+      <div>
+        <Table.PfProvider
+          striped
+          bordered
+          hover
+          dataTable
+          columns={columns}
+          components={{
+            header: {
+              cell: (cellProps) => {
+                return this.customHeaderFormatters({
+                  cellProps,
+                  columns,
+                  sortingColumns
+                });
+              }
+            }
+          }}
+        >
+          <Table.Header headerRows={resolve.headerRows({ columns })} />
+          <Table.Body
+            rows={sortedRows}
+            rowKey="id"
+            onRow={() => {
+              return {
+                role: 'row'
+              };
+            }}
+          />
+        </Table.PfProvider>
       </div>
     );
   }
