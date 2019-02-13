@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import AppGridRow from './AppGridRow';
 
 class AppGridRows extends Component {
   constructor() {
