@@ -2,7 +2,7 @@ import React from 'react';
 import { Table, TableHeader, TableBody, sortable, SortByDirection } from '@patternfly/react-table';
 
 class PF4Table extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props);
     this.state = {
       columns: [
@@ -24,7 +24,7 @@ class PF4Table extends React.Component {
     this.onSort = this.onSort.bind(this);
   }
 
-  onSort(_event, index, direction) {
+  onSort (_event, index, direction) {
     const sortedRows = this.state.rows.sort((a, b) => (a[index] < b[index] ? -1 : a[index] > b[index] ? 1 : 0));
     this.setState({
       sortBy: {
@@ -35,7 +35,7 @@ class PF4Table extends React.Component {
     });
   }
 
-  render() {
+  render () {
     const { columns, rows, sortBy } = this.state;
 
     return (
