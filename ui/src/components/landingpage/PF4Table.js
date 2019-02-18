@@ -1,15 +1,17 @@
 import React from 'react';
 import { Table, TableHeader, TableBody, sortable, SortByDirection } from '@patternfly/react-table';
+import { Redirect } from 'react-router-dom';
 
 class PF4Table extends React.Component {
   constructor (props) {
     super(props);
+
     this.state = {
       columns: [
         { title: 'Apps', transforms: [ sortable ] },
-        { title: 'Verions', transforms: [ sortable ] },
-        { title: 'Clients', transforms: [ sortable ] },
-        { title: 'Startups', transforms: [ sortable ] }
+        { title: 'Num of Deployed Versions', transforms: [ sortable ] },
+        { title: 'Num of Clients', transforms: [ sortable ] },
+        { title: 'Numb of App Sartups', transforms: [ sortable ] }
       ],
       rows: [
         [ 'App-A', 3, 245, 4 ],
@@ -19,9 +21,16 @@ class PF4Table extends React.Component {
         [ 'App-E', 5, 120, 8 ]
       ],
 
-      sortBy: {}
+      sortBy: {},
+      redirect: false
     };
     this.onSort = this.onSort.bind(this);
+    this.onRowClick = this.onRowClick.bind(this);
+  }
+
+  onRowClick (event, rowId, props) {
+    console.log('navigate was called on row: ', rowId.apps.title);
+    this.setState({ redirect: true });
   }
 
   onSort (_event, index, direction) {
@@ -36,12 +45,15 @@ class PF4Table extends React.Component {
   }
 
   render () {
-    const { columns, rows, sortBy } = this.state;
+    if (this.state.redirect === true) {
+      return <Redirect to='/overview' />;
+    }
 
+    const { columns, rows, sortBy } = this.state;
     return (
-      <Table caption="Mobile Apps" sortBy={sortBy} onSort={this.onSort} cells={columns} rows={rows}>
+      <Table aria-label="Mobile Apps" sortBy={sortBy} onSort={this.onSort} cells={columns} rows={rows}>
         <TableHeader />
-        <TableBody />
+        <TableBody onRowClick={this.onRowClick}/>
       </Table>
     );
   }
